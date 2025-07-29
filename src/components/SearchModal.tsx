@@ -32,6 +32,7 @@ import {
 import { LuChartNoAxesColumn } from "react-icons/lu";
 import { TbDropletHalf2Filled } from "react-icons/tb";
 import { CiUser, CiGlobe } from "react-icons/ci";
+import { fetchTokenMetadata } from "~/utils/functions";
 
 // Types
 export type SortOption = "time" | "market_cap" | "volume_1h" | "liquidity";
@@ -248,6 +249,52 @@ const sortTokens = (tokens: Token[], sortBy: SortOption): Token[] => {
   }
 };
 
+// Component: TokenLogo
+const TokenLogo: React.FC<{ token: Token | SearchHistoryItem }> = ({
+  token,
+}) => {
+  const [logoUrl, setLogoUrl] = useState<string | null>(token.logo || null);
+
+  useEffect(() => {
+    // Only try to fetch metadata for Token objects that have a uri property
+    if ("uri" in token && token.uri && !logoUrl) {
+      fetchTokenMetadata(token.uri)
+        .then((data) => {
+          if (data?.image) {
+            setLogoUrl(data.image);
+          }
+        })
+        .catch((error) => {
+          console.warn("Failed to fetch token metadata:", error);
+          // Keep the existing logoUrl if metadata fetch fails
+        });
+    }
+  }, [token, logoUrl]);
+
+  const handleImageError = useCallback(
+    (e: React.SyntheticEvent<HTMLImageElement>) => {
+      e.currentTarget.style.display = "none";
+      setLogoUrl(null);
+    },
+    [],
+  );
+
+  return logoUrl ? (
+    <img
+      src={logoUrl}
+      alt={token.symbol}
+      className="h-14 w-14 rounded-lg border border-teal-400/40 object-cover"
+      onError={handleImageError}
+    />
+  ) : (
+    <div className="flex h-12 w-12 items-center justify-center rounded-lg border border-teal-400/40 bg-neutral-800">
+      <span className="text-sm font-bold text-neutral-400">
+        {token.symbol?.charAt(0) || "?"}
+      </span>
+    </div>
+  );
+};
+
 // Component: Filter Button
 const FilterButton: React.FC<{
   option: (typeof FILTER_OPTIONS)[number];
@@ -329,22 +376,7 @@ const TokenItem: React.FC<{
       <div className="flex w-48 items-center gap-4">
         {/* Avatar */}
         <div className="relative flex-shrink-0">
-          {token.logo ? (
-            <img
-              src={token.logo}
-              alt={token.symbol}
-              className="h-14 w-14 rounded-lg border border-teal-400/40 object-cover"
-              onError={(e) => {
-                e.currentTarget.style.display = "none";
-              }}
-            />
-          ) : (
-            <div className="flex h-12 w-12 items-center justify-center rounded-lg border border-teal-400/40 bg-neutral-800">
-              <span className="text-sm font-bold text-neutral-400">
-                {token.symbol?.charAt(0) || "?"}
-              </span>
-            </div>
-          )}
+          <TokenLogo token={token} />
           {/* Overlay icon */}
           <div className="absolute -right-1 -bottom-1 flex h-5 w-5 items-center justify-center rounded-full border border-teal-400 bg-neutral-900">
             <span className="text-[9px] font-bold text-white">
@@ -504,6 +536,7 @@ export default function SearchModal({
         symbol: token.symbol,
         name: token.name,
         logo: token.logo,
+        uri: token.uri,
         total_fully_diluted_valuation: token.total_fully_diluted_valuation,
         total_buy_volume_24h: token.total_buy_volume_24h,
         total_sell_volume_24h: token.total_sell_volume_24h,
