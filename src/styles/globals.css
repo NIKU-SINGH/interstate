@@ -1,0 +1,101 @@
+@import "tailwindcss";
+@import './interstate.css';
+
+@theme {
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif,
+    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+}
+/* styles/globals.css */
+html,
+body {
+  overflow-x: hidden;
+  height: 100vh; /* or h-screen with Tailwind */
+  margin: 0;
+  padding: 0;
+  background-color: #000000;
+}
+
+/* Interstate Popout Styles */
+.interstate-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  background-color: transparent;
+  opacity: 0;
+  transition: opacity 200ms ease-in-out;
+  pointer-events: none;
+}
+
+.interstate-overlay.visible {
+  opacity: 1;
+  pointer-events: auto;
+  background-color: rgba(0, 0, 0, 0.6); /* Added for background dimming */
+}
+
+.interstate-overlay.align-center {
+  justify-content: center;
+  align-items: center;
+}
+
+.interstate-overlay.align-top-right {
+  justify-content: flex-end;
+  align-items: flex-start;
+  padding: 1rem;
+}
+
+.interstate-content {
+  position: relative;
+  opacity: 0;
+  transform: scale(0.95);
+  transition: all 200ms ease-in-out;
+  will-change: opacity, transform;
+  background: #262626;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+
+.interstate-content.visible {
+  opacity: 1;
+  transform: scale(1);
+}
+
+@keyframes wiggle {
+  0% { transform: translateX(0); }
+  15% { transform: translateX(-8px); }
+  30% { transform: translateX(8px); }
+  45% { transform: translateX(-6px); }
+  60% { transform: translateX(6px); }
+  75% { transform: translateX(-4px); }
+  90% { transform: translateX(4px); }
+  100% { transform: translateX(0); }
+}
+.wiggle {
+  animation: wiggle 0.6s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+/* Custom Scrollbar for PulseTable and other scrollable areas */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #14532d transparent; /* green thumb, transparent track */
+}
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  background: transparent; /* transparent track */
+  border-radius: 8px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #14532d; /* dark green thumb */
+  border-radius: 8px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #166534; /* lighter green on hover */
+}
+.custom-scrollbar::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Optional: Hide scrollbar buttons/arrows for a cleaner look */
+.custom-scrollbar::-webkit-scrollbar-button {
+  display: none;
+}
